@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Calculadora Pro - Simulador Online</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        input { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 1.2rem; text-align: center; }
+        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+        button:hover { background-color: #218838; }
+        .result { font-size: 1.5rem; font-weight: bold; color: #007bff; margin-top: 15px; }
+        .download-section { margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
+        .btn-buy { background-color: #007bff; display: block; width: 100%; margin: 10px 0; text-decoration: none; padding: 15px 0; color: white; font-weight: bold; border-radius: 8px; }
+        .btn-buy:hover { background-color: #0056b3; }
+        .price { font-size: 0.9rem; display: block; opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculadora Básica</h1>
+    <p>Prueba nuestra herramienta gratuita:</p>
+    
+    <input type="number" id="num1" placeholder="Número A">
+    <input type="number" id="num2" placeholder="Número B">
+    <br>
+    <button onclick="sumar()">Calcular Suma</button>
+    
+    <div class="result" id="res">Resultado: -</div>
+
+    <div class="download-section">
+        <h3>¿Necesitas más funciones?</h3>
+        <p>Descarga nuestras herramientas completas para Android:</p>
+        
+        <a href="#" class="btn-buy">
+            DESCARGAR APP ESTUDIO PRO
+            <span class="price">Precio: 20.000 Gs (3 USD)</span>
+        </a>
+
+        <a href="#" class="btn-buy" style="background-color: #6f42c1;">
+            DESCARGAR SIMULADOR AVANZADO
+            <span class="price">Precio: 35.000 Gs (5 USD)</span>
+        </a>
+    </div>
+</div>
+
+<script>
+    function sumar() {
+        const n1 = parseFloat(document.getElementById('num1').value);
+        const n2 = parseFloat(document.getElementById('num2').value);
+        if (!isNaN(n1) && !isNaN(n2)) {
+            document.getElementById('res').innerText = "Resultado: " + (n1 + n2);
+        } else {
+            alert("Por favor, ingresa números válidos");
+        }
+    }
+</script>
+
+</body>
+</html>
