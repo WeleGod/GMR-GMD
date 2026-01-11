@@ -785,7 +785,8 @@
     }
 
     // --- TABLA Y EDICION DMG ---
-    function renderDMGTable() {
+    // --- TABLA Y EDICION DMG ---
+function renderDMGTable() {
   const tbody = document.getElementById('coordsBody');
   tbody.innerHTML = '';
   
@@ -808,7 +809,7 @@
 
       <td>
         <input class="dmg-input"
-          type="number" step="any" inputmode="numeric"
+          type="text" inputmode="decimal"
           value="${p.x}"
           data-row="${index}" data-col="0"
           onfocus="this.select(); drawDMGGraph();"
@@ -817,7 +818,7 @@
 
       <td>
         <input class="dmg-input"
-          type="number" step="any" inputmode="numeric"
+          type="text" inputmode="decimal"
           value="${p.y}"
           data-row="${index}" data-col="1"
           onfocus="this.select(); drawDMGGraph();"
