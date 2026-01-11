@@ -805,11 +805,12 @@
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="phase-cell">${label}</td>
-                <td><input class="dmg-input" type="number" step="0.1" value="${p.x}" 
+                <td><input class="dmg-input" type="text" inputmode="decimal" value="${p.x}"
                     data-row="${index}" data-col="0"
                     onfocus="this.select(); drawDMGGraph();"
                     oninput="updatePoint(${index}, 'x', this.value)"></td>
-                <td><input class="dmg-input" type="number" step="0.1" value="${p.y}" 
+                
+                <td><input class="dmg-input" type="text" inputmode="decimal" value="${p.y}" 
                     data-row="${index}" data-col="1"
                     onfocus="this.select(); drawDMGGraph();"
                     oninput="updatePoint(${index}, 'y', this.value)"></td>
@@ -819,10 +820,15 @@
     }
 
     function updatePoint(index, field, val) {
-        // Permitir escribir signos negativos o decimales sin borrar todo
-        if (val === '' || val === '-') return; 
-        dmgData.points[index][field] = parseFloat(val);
-        calculateDMG(); 
+    // Permitir: vacío, solo menos, o solo menos y punto (para empezar a escribir -.5)
+    if (val === '' || val === '-' || val === '-.') return; 
+    
+    // Validar que sea un número real (esto evita letras si alguien usa teclado físico)
+    // La expresión regular permite: opcional negativo, dígitos, opcional punto y decimales
+    if (!/^-?\d*\.?\d*$/.test(val)) return; 
+
+    dmgData.points[index][field] = parseFloat(val);
+    calculateDMG();
     }
 
     // --- NAVEGACION POR TECLADO EXCEL STYLE ---
