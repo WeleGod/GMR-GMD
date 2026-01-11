@@ -3,58 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Calculadora Pro - Simulador Online</title>
+    <title>CMAG-IAAP | Advanced Programming</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 20px; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: #333; }
-        input { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 1.2rem; text-align: center; }
-        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
-        button:hover { background-color: #218838; }
-        .result { font-size: 1.5rem; font-weight: bold; color: #007bff; margin-top: 15px; }
-        .download-section { margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
-        .btn-buy { background-color: #007bff; display: block; width: 100%; margin: 10px 0; text-decoration: none; padding: 15px 0; color: white; font-weight: bold; border-radius: 8px; }
-        .btn-buy:hover { background-color: #0056b3; }
-        .price { font-size: 0.9rem; display: block; opacity: 0.9; }
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --text: #c9d1d9;
+            --accent: #58a6ff;
+            --success: #238636;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        header {
+            padding: 50px 20px;
+            text-align: center;
+            width: 100%;
+            border-bottom: 1px solid #30363d;
+        }
+        .logo { font-size: 2.5rem; font-weight: bold; color: white; margin: 0; }
+        .logo span { color: var(--accent); }
+        .tagline { color: #8b949e; margin-top: 10px; letter-spacing: 1px; }
+
+        .container { max-width: 800px; width: 90%; padding: 40px 0; }
+        
+        /* Estilo de la Calculadora */
+        .calc-card {
+            background: var(--card);
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: var(--bg);
+            border: 1px solid #30363d;
+            color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--success);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #2ea043; }
+
+        /* Sección de Descargas */
+        .app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .app-item {
+            background: var(--card);
+            border: 1px solid #30363d;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+        }
+        .app-item h3 { margin-top: 0; color: var(--accent); }
+        .price-badge {
+            background: #23863644;
+            color: #3fb950;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        .btn-buy {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) { .app-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
+<header>
+    <h1 class="logo">CMAG<span>-IAAP</span></h1>
+    <p class="tagline">INTELLIGENT ASSISTED ADVANCED PROGRAMMING</p>
+</header>
+
 <div class="container">
-    <h1>Calculadora Básica</h1>
-    <p>Prueba nuestra herramienta gratuita:</p>
-    
-    <input type="number" id="num1" placeholder="Número A">
-    <input type="number" id="num2" placeholder="Número B">
-    <br>
-    <button onclick="sumar()">Calcular Suma</button>
-    
-    <div class="result" id="res">Resultado: -</div>
+    <div class="calc-card">
+        <h3>Simulador Web (Beta)</h3>
+        <p>Prueba el motor de cálculo antes de adquirir la APK completa.</p>
+        <input type="number" id="n1" placeholder="Dato A">
+        <input type="number" id="n2" placeholder="Dato B">
+        <button onclick="ejecutar()">SIMULAR PROCESO IA</button>
+        <div id="out" style="margin-top:20px; font-weight:bold; color:var(--accent);"></div>
+    </div>
 
-    <div class="download-section">
-        <h3>¿Necesitas más funciones?</h3>
-        <p>Descarga nuestras herramientas completas para Android:</p>
-        
-        <a href="#" class="btn-buy">
-            DESCARGAR APP ESTUDIO PRO
-            <span class="price">Precio: 20.000 Gs (3 USD)</span>
-        </a>
-
-        <a href="#" class="btn-buy" style="background-color: #6f42c1;">
-            DESCARGAR SIMULADOR AVANZADO
-            <span class="price">Precio: 35.000 Gs (5 USD)</span>
-        </a>
+    <div class="app-grid">
+        <div class="app-item">
+            <h3>Estudio Pro APK</h3>
+            <span class="price-badge">20.000 GS / 3 USD</span>
+            <p>Acceso total a fórmulas y resolución paso a paso.</p>
+            <a href="#" class="btn-buy"><i class="fab fa-android"></i> OBTENER APK</a>
+        </div>
+        <div class="app-item">
+            <h3>Simulador v2</h3>
+            <span class="price-badge">35.000 GS / 5 USD</span>
+            <p>Herramienta avanzada para cálculos complejos.</p>
+            <a href="#" class="btn-buy"><i class="fab fa-android"></i> OBTENER APK</a>
+        </div>
     </div>
 </div>
 
 <script>
-    function sumar() {
-        const n1 = parseFloat(document.getElementById('num1').value);
-        const n2 = parseFloat(document.getElementById('num2').value);
-        if (!isNaN(n1) && !isNaN(n2)) {
-            document.getElementById('res').innerText = "Resultado: " + (n1 + n2);
+    function ejecutar() {
+        const val1 = parseFloat(document.getElementById('n1').value);
+        const val2 = parseFloat(document.getElementById('n2').value);
+        if(!isNaN(val1) && !isNaN(val2)) {
+            // Aquí pondrás tu lógica real de cálculo
+            document.getElementById('out').innerText = "Resultado Asistido: " + (val1 * val2 / 1.5).toFixed(2);
         } else {
-            alert("Por favor, ingresa números válidos");
+            alert("Por favor ingresa valores válidos.");
         }
     }
 </script>
