@@ -786,50 +786,64 @@
 
     // --- TABLA Y EDICION DMG ---
     function renderDMGTable() {
-        const tbody = document.getElementById('coordsBody');
-        tbody.innerHTML = '';
-        
-        const lblsABC = ["A", "B", "C", "A'", "B'", "C'"];
-        const lblsRST = ["R", "S", "T", "R'", "S'", "T'"];
-        const labels = (dmgData.labelMode === 'ABC') ? lblsABC : lblsRST;
-        let countMap = {}; 
+  const tbody = document.getElementById('coordsBody');
+  tbody.innerHTML = '';
+  
+  const lblsABC = ["A", "B", "C", "A'", "B'", "C'"];
+  const lblsRST = ["R", "S", "T", "R'", "S'", "T'"];
+  const labels = (dmgData.labelMode === 'ABC') ? lblsABC : lblsRST;
+  let countMap = {}; 
 
-        dmgData.points.forEach((p, index) => {
-            if(!countMap[p.ph]) countMap[p.ph] = 0;
-            countMap[p.ph]++;
-            
-            let label = labels[p.ph - 1] || "?";
-            const totalInPhase = dmgData.points.filter(x => x.ph === p.ph).length;
-            if(totalInPhase > 1) label += "." + countMap[p.ph];
+  dmgData.points.forEach((p, index) => {
+    if(!countMap[p.ph]) countMap[p.ph] = 0;
+    countMap[p.ph]++;
 
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="phase-cell">${label}</td>
-                <td><input class="dmg-input" type="text" inputmode="decimal" value="${p.x}"
-                    data-row="${index}" data-col="0"
-                    onfocus="this.select(); drawDMGGraph();"
-                    oninput="updatePoint(${index}, 'x', this.value)"></td>
-                
-                <td><input class="dmg-input" type="text" inputmode="decimal" value="${p.y}" 
-                    data-row="${index}" data-col="1"
-                    onfocus="this.select(); drawDMGGraph();"
-                    oninput="updatePoint(${index}, 'y', this.value)"></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
+    let label = labels[p.ph - 1] || "?";
+    const totalInPhase = dmgData.points.filter(x => x.ph === p.ph).length;
+    if(totalInPhase > 1) label += "." + countMap[p.ph];
 
+    let tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="phase-cell">${label}</td>
+
+      <td>
+        <input class="dmg-input"
+          type="number" step="any" inputmode="numeric"
+          value="${p.x}"
+          data-row="${index}" data-col="0"
+          onfocus="this.select(); drawDMGGraph();"
+          oninput="updatePoint(${index}, 'x', this.value)">
+      </td>
+
+      <td>
+        <input class="dmg-input"
+          type="number" step="any" inputmode="numeric"
+          value="${p.y}"
+          data-row="${index}" data-col="1"
+          onfocus="this.select(); drawDMGGraph();"
+          oninput="updatePoint(${index}, 'y', this.value)">
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
     function updatePoint(index, field, val) {
-    // Permitir: vacío, solo menos, o solo menos y punto (para empezar a escribir -.5)
-    if (val === '' || val === '-' || val === '-.') return; 
-    
-    // Validar que sea un número real (esto evita letras si alguien usa teclado físico)
-    // La expresión regular permite: opcional negativo, dígitos, opcional punto y decimales
-    if (!/^-?\d*\.?\d*$/.test(val)) return; 
+  // Vacío: no romper (dejar al usuario escribir)
+  if (val === '' || val === '-' || val === '-.') return;
 
-    dmgData.points[index][field] = parseFloat(val);
-    calculateDMG();
-    }
+  // Aceptar . o , como decimal (algunos teclados meten coma)
+  val = (""+val).replace(",", ".");
+
+  // Validación simple número real con signo
+  if (!/^-?\d*\.?\d*$/.test(val)) return;
+
+  const num = parseFloat(val);
+  if (!isFinite(num)) return;
+
+  dmgData.points[index][field] = num;
+  calculateDMG();
+}
+
 
     // --- NAVEGACION POR TECLADO EXCEL STYLE ---
     function handleDMGKeydown(e) {
