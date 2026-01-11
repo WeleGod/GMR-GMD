@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMAG-IAAP | Advanced Programming</title>
+    <title>CMAG-IAAP | GMR Simulator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -12,9 +12,10 @@
             --text: #c9d1d9;
             --accent: #58a6ff;
             --success: #238636;
+            --grid-line: #30363d;
         }
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
+            font-family: 'Segoe UI', monospace, sans-serif; 
             background-color: var(--bg); 
             color: var(--text); 
             margin: 0; 
@@ -22,119 +23,331 @@
             flex-direction: column; 
             align-items: center; 
         }
-        header {
-            padding: 50px 20px;
-            text-align: center;
-            width: 100%;
-            border-bottom: 1px solid #30363d;
-        }
-        .logo { font-size: 2.5rem; font-weight: bold; color: white; margin: 0; }
-        .logo span { color: var(--accent); }
-        .tagline { color: #8b949e; margin-top: 10px; letter-spacing: 1px; }
-
-        .container { max-width: 800px; width: 90%; padding: 40px 0; }
         
-        /* Estilo de la Calculadora */
-        .calc-card {
+        /* Header */
+        header { padding: 30px 20px; text-align: center; border-bottom: 1px solid var(--grid-line); width: 100%; }
+        .logo { font-size: 2rem; font-weight: 800; color: white; margin: 0; letter-spacing: -1px; }
+        .logo span { color: var(--accent); }
+        .subtitle { color: #8b949e; font-size: 0.9rem; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .container { max-width: 900px; width: 95%; padding: 20px 0; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+
+        /* Panel Izquierdo: Editor */
+        .editor-panel {
             background: var(--card);
-            border: 1px solid #30363d;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 30px;
+            border: 1px solid var(--grid-line);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            flex: 1;
+            min-width: 300px;
         }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background: var(--bg);
-            border: 1px solid #30363d;
-            color: white;
-            border-radius: 6px;
-            box-sizing: border-box;
+        
+        canvas {
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--success);
-            color: white;
+
+        .controls { margin-top: 15px; display: flex; gap: 10px; justify-content: center; }
+        .btn {
+            padding: 10px 15px;
             border: none;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            font-size: 0.9rem;
+            transition: 0.2s;
         }
-        button:hover { background-color: #2ea043; }
+        .btn-mode { background: #333; color: white; }
+        .btn-mode:hover { background: #444; }
+        .btn-calc { background: var(--success); color: white; width: 100%; margin-top: 15px; font-size: 1.1rem; }
+        .btn-calc:hover { background: #2ea043; }
+        .btn-reset { background: #da3633; color: white; }
 
-        /* Sección de Descargas */
-        .app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .app-item {
+        /* Panel Derecho: Resultados */
+        .result-panel {
             background: var(--card);
-            border: 1px solid #30363d;
+            border: 1px solid var(--grid-line);
+            border-radius: 12px;
             padding: 20px;
-            border-radius: 10px;
-            text-align: left;
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-        .app-item h3 { margin-top: 0; color: var(--accent); }
-        .price-badge {
-            background: #23863644;
-            color: #3fb950;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+        
+        .result-box {
+            background: rgba(88, 166, 255, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin-bottom: 20px;
         }
-        .btn-buy {
+        .result-val { font-size: 1.8rem; font-weight: bold; color: white; margin: 10px 0; }
+        .formula { font-family: 'Courier New', monospace; color: #8b949e; }
+        
+        .mini-geo { text-align: center; margin-top: 20px; opacity: 0.7; }
+        
+        /* Footer Apps */
+        .apps-section { width: 100%; margin-top: 40px; border-top: 1px solid var(--grid-line); padding-top: 20px; text-align: center; }
+        .download-btn {
             display: inline-block;
-            margin-top: 15px;
+            margin: 10px;
+            padding: 12px 25px;
+            background: transparent;
+            border: 1px solid var(--accent);
             color: var(--accent);
             text-decoration: none;
-            font-size: 0.9rem;
+            border-radius: 30px;
+            font-weight: bold;
         }
+        .download-btn:hover { background: var(--accent); color: #000; }
 
-        @media (max-width: 600px) { .app-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <header>
     <h1 class="logo">CMAG<span>-IAAP</span></h1>
-    <p class="tagline">INTELLIGENT ASSISTED ADVANCED PROGRAMMING</p>
+    <div class="subtitle">Geometric Mean Radius Simulator</div>
 </header>
 
 <div class="container">
-    <div class="calc-card">
-        <h3>Simulador Web (Beta)</h3>
-        <p>Prueba el motor de cálculo antes de adquirir la APK completa.</p>
-        <input type="number" id="n1" placeholder="Dato A">
-        <input type="number" id="n2" placeholder="Dato B">
-        <button onclick="ejecutar()">SIMULAR PROCESO IA</button>
-        <div id="out" style="margin-top:20px; font-weight:bold; color:var(--accent);"></div>
+    
+    <div class="editor-panel">
+        <h3 style="color:white; margin-top:0;"><i class="fas fa-th"></i> Editor de Hilos</h3>
+        <canvas id="matrixCanvas" width="280" height="280"></canvas>
+        
+        <div class="controls">
+            <button class="btn btn-mode" onclick="toggleMode()" id="modeBtn">MODO: RECT</button>
+            <button class="btn btn-reset" onclick="resetMatrix()"><i class="fas fa-trash"></i> RESET</button>
+        </div>
+        
+        <button class="btn btn-calc" onclick="calcularGMR()"><i class="fas fa-microchip"></i> CALCULAR IA</button>
+        <p style="font-size: 0.8rem; color: #666;">Toca la grilla para agregar/quitar conductores.</p>
     </div>
 
-    <div class="app-grid">
-        <div class="app-item">
-            <h3>Estudio Pro APK</h3>
-            <span class="price-badge">20.000 GS / 3 USD</span>
-            <p>Acceso total a fórmulas y resolución paso a paso.</p>
-            <a href="#" class="btn-buy"><i class="fab fa-android"></i> OBTENER APK</a>
+    <div class="result-panel">
+        <h3 style="color:var(--accent);">Resultados RMG (Simbólico)</h3>
+        
+        <div class="result-box">
+            <div style="font-size: 0.9rem; color: var(--accent);">COEFICIENTE INDUCTIVO (Ds)</div>
+            <div class="result-val" id="resText">Ds = 0.7788 * r</div>
+            <div class="formula">Calculado mediante algoritmo GMR</div>
         </div>
-        <div class="app-item">
-            <h3>Simulador v2</h3>
-            <span class="price-badge">35.000 GS / 5 USD</span>
-            <p>Herramienta avanzada para cálculos complejos.</p>
-            <a href="#" class="btn-buy"><i class="fab fa-android"></i> OBTENER APK</a>
+
+        <div style="border-top: 1px solid #333; padding-top: 15px;">
+            <p><strong>Configuración:</strong></p>
+            <p><i class="fas fa-circle-nodes"></i> Hilos activos: <span id="hilosCount" style="color:white;">1</span></p>
+            <p><i class="fas fa-ruler-horizontal"></i> Radio del hilo: <span style="color:white;">r</span></p>
+            <p id="singleStrandNote" style="color: #8b949e; font-size: 0.85rem;">Nota: 1 solo hilo → r' = r * e^(-1/4)</p>
         </div>
     </div>
+
+</div>
+
+<div class="apps-section">
+    <h3>Obtén la herramienta completa</h3>
+    <p style="max-width: 600px; margin: 0 auto 20px auto; color: #888;">La versión web es solo una demo. Descarga la APK para guardar perfiles, exportar a PDF y cálculos de impedancia completos.</p>
+    <a href="#" class="download-btn">CALCULADORA PRO (3 USD)</a>
+    <a href="#" class="download-btn">SIMULADOR CMAG-IA (5 USD)</a>
 </div>
 
 <script>
-    function ejecutar() {
-        const val1 = parseFloat(document.getElementById('n1').value);
-        const val2 = parseFloat(document.getElementById('n2').value);
-        if(!isNaN(val1) && !isNaN(val2)) {
-            // Aquí pondrás tu lógica real de cálculo
-            document.getElementById('out').innerText = "Resultado Asistido: " + (val1 * val2 / 1.5).toFixed(2);
+    // --- VARIABLES GLOBALES (Estado) ---
+    const ROWS = 7;
+    const COLS = 7;
+    let matrix = []; 
+    let isHexMode = false; // false = Rectangular, true = Hexagonal
+    
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Inicialización
+    resetMatrix();
+
+    // --- LÓGICA GRÁFICA (Canvas) ---
+    function draw() {
+        // Limpiar
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Configuración de dimensiones
+        const spacing = 35; // Pixeles entre centros
+        const radius = 13;
+        const offsetX = canvas.width / 2;
+        const offsetY = canvas.height / 2;
+
+        for (let i = 0; i < ROWS; i++) {
+            for (let j = 0; j < COLS; j++) {
+                // Cálculo de coordenadas (Traducción exacta de tu PPL)
+                // PPL: px_d := cx_scr + (j-4)*spacing
+                // Hex offset: if (i%2==0) offset = 0.5
+                
+                let dx = (j - 3) * spacing; // 3 es el centro (indice 0-6)
+                let dy = (i - 3) * spacing;
+
+                if (isHexMode) {
+                    let off_hex = ((i % 2) === 0) ? 0.5 : 0; // Fila par desplazada
+                    dx = (j - 3 + off_hex) * spacing;
+                    dy = (i - 3) * (spacing * 0.866025); // sqrt(3)/2
+                }
+
+                const px = offsetX + dx;
+                const py = offsetY + dy;
+
+                // Dibujar Hilo
+                ctx.beginPath();
+                ctx.arc(px, py, radius, 0, 2 * Math.PI);
+                
+                if (matrix[i][j] === 1) {
+                    // Hilo Activo (Azul relleno como la HP Prime)
+                    ctx.fillStyle = "#0044ff";
+                    ctx.fill();
+                    ctx.strokeStyle = "#58a6ff";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Brillo interno
+                    ctx.beginPath();
+                    ctx.arc(px, py, radius * 0.7, 0, 2 * Math.PI);
+                    ctx.fillStyle = "#58a6ff";
+                    // ctx.fill(); // Opcional: hacerlo solido
+                } else {
+                    // Hilo Inactivo (Gris borde)
+                    ctx.strokeStyle = "#333";
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(px, py, 1, 0, 2 * Math.PI); // Punto central
+                    ctx.fillStyle = "#333";
+                    ctx.fill();
+                }
+            }
+        }
+    }
+
+    // --- INTERACCIÓN ---
+    canvas.addEventListener('click', function(event) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = event.clientX - rect.left;
+        const my = event.clientY - rect.top;
+
+        // Lógica inversa para detectar clic (Hit detection)
+        const spacing = 35;
+        const offsetX = canvas.width / 2;
+        const offsetY = canvas.height / 2;
+
+        for (let i = 0; i < ROWS; i++) {
+            for (let j = 0; j < COLS; j++) {
+                let dx = (j - 3) * spacing;
+                let dy = (i - 3) * spacing;
+                
+                if (isHexMode) {
+                    let off_hex = ((i % 2) === 0) ? 0.5 : 0;
+                    dx = (j - 3 + off_hex) * spacing;
+                    dy = (i - 3) * (spacing * 0.866025);
+                }
+                
+                const px = offsetX + dx;
+                const py = offsetY + dy;
+                
+                // Distancia euclidiana
+                const dist = Math.sqrt((mx-px)**2 + (my-py)**2);
+                if (dist < 15) { // Radio de clic
+                    matrix[i][j] = 1 - matrix[i][j]; // Toggle
+                    draw();
+                    return;
+                }
+            }
+        }
+    });
+
+    function toggleMode() {
+        isHexMode = !isHexMode;
+        document.getElementById('modeBtn').innerText = isHexMode ? "MODO: HEX" : "MODO: RECT";
+        draw();
+    }
+
+    function resetMatrix() {
+        // Matriz 7x7 vacía con el centro activo
+        matrix = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+        matrix[3][3] = 1; // Centro activo por defecto
+        draw();
+        document.getElementById('resText').innerText = "---";
+    }
+
+    // --- MOTOR MATEMÁTICO (Traducción de PLT_CalcGMR) ---
+    function calcularGMR() {
+        // 1. Convertir Matriz a Lista de Puntos (x,y)
+        // Asumimos radio r=1, entonces diametro=2. Spacing = 2.0
+        let points = [];
+        const spacing = 2.0; 
+
+        for (let i = 0; i < ROWS; i++) {
+            for (let j = 0; j < COLS; j++) {
+                if (matrix[i][j] === 1) {
+                    let x = (j - 3) * spacing;
+                    let y = -(i - 3) * spacing; // Invertimos Y para coordenada cartesiana
+
+                    if (isHexMode) {
+                        let off_hex = ((i % 2) === 0) ? 0.5 : 0;
+                        x = (j - 3 + off_hex) * spacing;
+                        y = -(i - 3) * (spacing * 0.866025);
+                    }
+                    points.push({x: x, y: y});
+                }
+            }
+        }
+
+        const n = points.length;
+        document.getElementById('hilosCount').innerText = n;
+        
+        if (n === 0) {
+            document.getElementById('resText').innerText = "Selecciona hilos";
+            return;
+        }
+
+        // 2. Algoritmo GMR Generalizado
+        // ln(Ds) = (1/n^2) * sum(sum(ln(distance_ij)))
+        // Si i==j, distance = r' = e^(-1/4) * r. (Como r=1, distance = 0.7788)
+        
+        let sumLogDist = 0;
+        const r_prime = Math.exp(-0.25); // 0.7788...
+
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                let dist = 0;
+                if (i === j) {
+                    dist = r_prime; // Distancia propia (GMR propio)
+                } else {
+                    // Distancia entre hilo i e hilo j
+                    dist = Math.sqrt( (points[i].x - points[j].x)**2 + (points[i].y - points[j].y)**2 );
+                    
+                    // IMPORTANTE: Los puntos están separados por "spacing=2" (2 radios).
+                    // Pero la formula de GMR pide distancias en función de r.
+                    // Si r=1, la distancia física real es correcta tal cual la calculamos?
+                    // Sí, porque definimos spacing=2.
+                    // Ejemplo: 2 hilos tangentes. Distancia centros = 2. GMR debe usar 2.
+                }
+                sumLogDist += Math.log(dist);
+            }
+        }
+
+        const ln_Ds = (1 / (n * n)) * sumLogDist;
+        const Ds = Math.exp(ln_Ds);
+
+        // 3. Mostrar Resultado
+        // Ds final es el factor K_L por r.
+        document.getElementById('resText').innerText = "Ds = " + Ds.toFixed(6) + " * r";
+        
+        if (n === 1) {
+            document.getElementById('singleStrandNote').style.display = 'block';
         } else {
-            alert("Por favor ingresa valores válidos.");
+            document.getElementById('singleStrandNote').style.display = 'none';
         }
     }
 </script>
