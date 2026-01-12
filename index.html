@@ -842,55 +842,55 @@
     // --- TABLA Y EDICION DMG ---
 // --- TABLA Y EDICION DMG (VERSIÓN TECLADO COMPLETO) ---
 function renderDMGTable() {
-        const tbody = document.getElementById('coordsBody');
-        tbody.innerHTML = '';
+    const tbody = document.getElementById('coordsBody');
+    tbody.innerHTML = '';
+    
+    const lblsABC = ["A", "B", "C", "A'", "B'", "C'"];
+    const lblsRST = ["R", "S", "T", "R'", "S'", "T'"];
+    const labels = (dmgData.labelMode === 'ABC') ? lblsABC : lblsRST;
+    let countMap = {}; 
+
+    dmgData.points.forEach((p, index) => {
+        if(!countMap[p.ph]) countMap[p.ph] = 0;
+        countMap[p.ph]++;
         
-        const lblsABC = ["A", "B", "C", "A'", "B'", "C'"];
-        const lblsRST = ["R", "S", "T", "R'", "S'", "T'"];
-        const labels = (dmgData.labelMode === 'ABC') ? lblsABC : lblsRST;
-        let countMap = {}; 
+        let label = labels[p.ph - 1] || "?";
+        const totalInPhase = dmgData.points.filter(x => x.ph === p.ph).length;
+        if(totalInPhase > 1) label += "." + countMap[p.ph];
 
-        dmgData.points.forEach((p, index) => {
-            if(!countMap[p.ph]) countMap[p.ph] = 0;
-            countMap[p.ph]++;
+        let tr = document.createElement('tr');
+        
+        // --- CAMBIO CLAVE EN EL REGEX ---
+        // Usamos: /[^0-9.,+*\/() -]/g
+        // 1. La barra de dividir '/' tiene una contra barra '\' antes para que no cierre el regex.
+        // 2. El guion '-' está AL FINAL DE TODO. Esto evita que rompa el código.
+        
+        tr.innerHTML = `
+            <td class="phase-cell">${label}</td>
+
+            <td>
+                <input class="dmg-input" 
+                    type="text" 
+                    value="${p.x}"
+                    data-row="${index}" data-col="0"
+                    onfocus="this.select();"
+                    oninput="this.value = this.value.replace(/[^0-9.,+*\/() -]/g, ''); updatePoint(${index}, 'x', this.value)"
+                    onchange="smartCalculate(this, ${index}, 'x')">
+            </td>
             
-            let label = labels[p.ph - 1] || "?";
-            const totalInPhase = dmgData.points.filter(x => x.ph === p.ph).length;
-            if(totalInPhase > 1) label += "." + countMap[p.ph];
-
-            let tr = document.createElement('tr');
-            
-            /* CORRECCIÓN APLICADA:
-               En oninput hacemos DOS cosas:
-               1. Limpiamos caracteres inválidos (letras).
-               2. Llamamos a updatePoint para que el gráfico se mueva en vivo si es un número simple.
-            */
-            tr.innerHTML = `
-                <td class="phase-cell">${label}</td>
-
-                <td>
-                    <input class="dmg-input" 
-                        type="text" 
-                        value="${p.x}"
-                        data-row="${index}" data-col="0"
-                        onfocus="this.select();"
-                        oninput="this.value = this.value.replace(/[^0-9.,+\-*/()]/g, ''); updatePoint(${index}, 'x', this.value)"
-                        onchange="smartCalculate(this, ${index}, 'x')">
-                </td>
-                
-                <td>
-                    <input class="dmg-input" 
-                        type="text" 
-                        value="${p.y}" 
-                        data-row="${index}" data-col="1"
-                        onfocus="this.select();"
-                        oninput="this.value = this.value.replace(/[^0-9.,+\-*/()]/g, ''); updatePoint(${index}, 'y', this.value)"
-                        onchange="smartCalculate(this, ${index}, 'y')">
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
+            <td>
+                <input class="dmg-input" 
+                    type="text" 
+                    value="${p.y}" 
+                    data-row="${index}" data-col="1"
+                    onfocus="this.select();"
+                    oninput="this.value = this.value.replace(/[^0-9.,+*\/() -]/g, ''); updatePoint(${index}, 'y', this.value)"
+                    onchange="smartCalculate(this, ${index}, 'y')">
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
     function updatePoint(index, field, val) {
         // 1. Permitir estados intermedios mientras se escribe
         if (val === '' || val === '-' || val === '-.') return; 
