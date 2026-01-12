@@ -785,66 +785,70 @@
     }
 
     // --- TABLA Y EDICION DMG ---
-    // --- TABLA Y EDICION DMG ---
-function renderDMGTable() {
-  const tbody = document.getElementById('coordsBody');
-  tbody.innerHTML = '';
-  
-  const lblsABC = ["A", "B", "C", "A'", "B'", "C'"];
-  const lblsRST = ["R", "S", "T", "R'", "S'", "T'"];
-  const labels = (dmgData.labelMode === 'ABC') ? lblsABC : lblsRST;
-  let countMap = {}; 
+// --- TABLA Y EDICION DMG (VERSIÓN TECLADO COMPLETO) ---
+    function renderDMGTable() {
+        const tbody = document.getElementById('coordsBody');
+        tbody.innerHTML = '';
+        
+        const lblsABC = ["A", "B", "C", "A'", "B'", "C'"];
+        const lblsRST = ["R", "S", "T", "R'", "S'", "T'"];
+        const labels = (dmgData.labelMode === 'ABC') ? lblsABC : lblsRST;
+        let countMap = {}; 
 
-  dmgData.points.forEach((p, index) => {
-    if(!countMap[p.ph]) countMap[p.ph] = 0;
-    countMap[p.ph]++;
+        dmgData.points.forEach((p, index) => {
+            if(!countMap[p.ph]) countMap[p.ph] = 0;
+            countMap[p.ph]++;
+            
+            let label = labels[p.ph - 1] || "?";
+            const totalInPhase = dmgData.points.filter(x => x.ph === p.ph).length;
+            if(totalInPhase > 1) label += "." + countMap[p.ph];
 
-    let label = labels[p.ph - 1] || "?";
-    const totalInPhase = dmgData.points.filter(x => x.ph === p.ph).length;
-    if(totalInPhase > 1) label += "." + countMap[p.ph];
+            let tr = document.createElement('tr');
+            
+            // CAMBIO: type="text" SIN inputmode. 
+            // Esto abre el teclado QWERTY completo.
+            tr.innerHTML = `
+                <td class="phase-cell">${label}</td>
 
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="phase-cell">${label}</td>
-
-      <td>
-        <input class="dmg-input"
-          type="text" inputmode="decimal"
-          value="${p.x}"
-          data-row="${index}" data-col="0"
-          onfocus="this.select(); drawDMGGraph();"
-          oninput="updatePoint(${index}, 'x', this.value)">
-      </td>
-
-      <td>
-        <input class="dmg-input"
-          type="text" inputmode="decimal"
-          value="${p.y}"
-          data-row="${index}" data-col="1"
-          onfocus="this.select(); drawDMGGraph();"
-          oninput="updatePoint(${index}, 'y', this.value)">
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+                <td>
+                    <input class="dmg-input" 
+                        type="text" 
+                        value="${p.x}"
+                        data-row="${index}" data-col="0"
+                        onfocus="this.select(); drawDMGGraph();"
+                        oninput="updatePoint(${index}, 'x', this.value)">
+                </td>
+                
+                <td>
+                    <input class="dmg-input" 
+                        type="text" 
+                        value="${p.y}" 
+                        data-row="${index}" data-col="1"
+                        onfocus="this.select(); drawDMGGraph();"
+                        oninput="updatePoint(${index}, 'y', this.value)">
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
     function updatePoint(index, field, val) {
-  // Vacío: no romper (dejar al usuario escribir)
-  if (val === '' || val === '-' || val === '-.') return;
+        // 1. Permitir estados intermedios (vacío, solo menos, menos y punto)
+        if (val === '' || val === '-' || val === '-.') return; 
+        
+        // 2. Reemplazar coma por punto (común en teclados en español)
+        val = val.replace(',', '.');
 
-  // Aceptar . o , como decimal (algunos teclados meten coma)
-  val = (""+val).replace(",", ".");
+        // 3. Validación estricta: Solo permite números (positivos/negativos/decimales)
+        // Esto bloquea letras si el usuario intenta escribirlas con el teclado completo.
+        if (!/^-?\d*\.?\d*$/.test(val)) return; 
 
-  // Validación simple número real con signo
-  if (!/^-?\d*\.?\d*$/.test(val)) return;
-
-  const num = parseFloat(val);
-  if (!isFinite(num)) return;
-
-  dmgData.points[index][field] = num;
-  calculateDMG();
-}
-
+        // 4. Si es válido, convertir y guardar
+        let num = parseFloat(val);
+        if (!isNaN(num)) {
+            dmgData.points[index][field] = num;
+            calculateDMG();
+        }
+    }
 
     // --- NAVEGACION POR TECLADO EXCEL STYLE ---
     function handleDMGKeydown(e) {
