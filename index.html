@@ -786,7 +786,7 @@
 
     // --- TABLA Y EDICION DMG ---
 // --- TABLA Y EDICION DMG (VERSIÓN TECLADO COMPLETO) ---
-    function renderDMGTable() {
+function renderDMGTable() {
         const tbody = document.getElementById('coordsBody');
         tbody.innerHTML = '';
         
@@ -805,9 +805,10 @@
 
             let tr = document.createElement('tr');
             
-            /* EXPLICACIÓN DE CAMBIOS:
-               1. oninput: Regex relajado /[^0-9.,+\-*/()]/g para permitir mates.
-               2. onchange: Se dispara al dar ENTER o salir de la celda. Llama a smartCalculate.
+            /* CORRECCIÓN APLICADA:
+               En oninput hacemos DOS cosas:
+               1. Limpiamos caracteres inválidos (letras).
+               2. Llamamos a updatePoint para que el gráfico se mueva en vivo si es un número simple.
             */
             tr.innerHTML = `
                 <td class="phase-cell">${label}</td>
@@ -818,7 +819,7 @@
                         value="${p.x}"
                         data-row="${index}" data-col="0"
                         onfocus="this.select();"
-                        oninput="this.value = this.value.replace(/[^0-9.,+\-*/()]/g, '')"
+                        oninput="this.value = this.value.replace(/[^0-9.,+\-*/()]/g, ''); updatePoint(${index}, 'x', this.value)"
                         onchange="smartCalculate(this, ${index}, 'x')">
                 </td>
                 
@@ -828,7 +829,7 @@
                         value="${p.y}" 
                         data-row="${index}" data-col="1"
                         onfocus="this.select();"
-                        oninput="this.value = this.value.replace(/[^0-9.,+\-*/()]/g, '')"
+                        oninput="this.value = this.value.replace(/[^0-9.,+\-*/()]/g, ''); updatePoint(${index}, 'y', this.value)"
                         onchange="smartCalculate(this, ${index}, 'y')">
                 </td>
             `;
