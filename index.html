@@ -249,10 +249,34 @@
         .footer-result { background: #404040; display: flex; padding: 0; width: 100%; }
 
         /* --- COLUMNA DERECHA GENERAL --- */
-        .card-header-modern { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border); }
-        .card-header-modern h3 { margin: 0; color: var(--accent); font-size: 1.1rem; }
-        .modern-badge { background: #23863644; color: #3fb950; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; }
-        
+        /* HEADER DE LAS TARJETAS */
+        .card-header-modern { 
+            display: flex; 
+            justify-content: space-between; /* ESTO EMPUJA LA VERSIÓN A LA DERECHA */
+            align-items: center; 
+            padding: 15px 20px; 
+            border-bottom: 1px solid var(--border); 
+        }
+
+        .card-header-modern h3 { 
+            margin: 0; 
+            color: var(--accent); 
+            font-size: 1.1rem;
+            display: flex;       /* Para alinear icono y texto */
+            align-items: center; 
+        }
+
+        /* ETIQUETA DE VERSIÓN (Pequeña y separada) */
+        .modern-badge { 
+            background: #23863644; 
+            color: #3fb950; 
+            padding: 3px 8px;
+            border-radius: 4px; 
+            font-size: 0.55rem;     /* Texto pequeño */
+            letter-spacing: 1.5px;  /* Letras separadas */
+            font-weight: bold;
+            white-space: nowrap;    /* Evita que se rompa en dos líneas */
+        }
         /* DESCARGAS */
         .downloads-section { grid-column: 1 / -1; margin-top: 40px; border-top: 1px solid var(--border); padding-top: 30px; }
         .app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -274,7 +298,25 @@
         
         <div class="calc-card">
             <div class="card-header-modern">
-                <h3><i class="fas fa-project-diagram"></i> Calculadora de RMG</h3>
+                <h3>
+                    <svg width="34" height="34" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="margin-right: 12px;">
+                        <g fill="none" stroke="#58a6ff">
+                            <circle cx="50" cy="50" r="46" stroke-width="4" />
+                            
+                            <g stroke-width="6">
+                                <circle cx="50" cy="50" r="13" />
+                                <circle cx="50" cy="22" r="13" />
+                                <circle cx="74" cy="36" r="13" />
+                                <circle cx="74" cy="64" r="13" />
+                                <circle cx="50" cy="78" r="13" />
+                                <circle cx="26" cy="64" r="13" />
+                                <circle cx="26" cy="36" r="13" />
+                            </g>
+                        </g>
+                    </svg>
+                    Calculadora de RMG
+                </h3>
+                
                 <span class="modern-badge">vPLT_Module_RMG</span>
             </div>
 
@@ -314,7 +356,10 @@
 
         <div class="calc-card">
             <div class="card-header-modern">
-                <h3><i class="fas fa-calculator"></i> Calculadora de DMG</h3>
+                <h3>
+                    <i class="fas fa-calculator" style="margin-right: 12px; font-size: 1.5rem;"></i> 
+                    Calculadora de DMG
+                </h3>
                 <span class="modern-badge" style="background:#d2a8ff44; color:#d2a8ff;">vPLT_Module_DMG_Live</span>
             </div>
 
@@ -582,7 +627,10 @@
                     editorZone = 'GRID';
                     cursorRow = i; cursorCol = j;
                     updateButtonVisuals();
-                    draw(); return;
+                    draw();
+					// AGREGAR ESTA LÍNEA AQUÍ: guardado de datos
+                    guardarDatos();
+					return;
                 }
             }
         }
@@ -591,7 +639,8 @@
     function toggleMode() { 
         isHexMode = !isHexMode; 
         document.getElementById('headerTitle').innerText = isHexMode ? "Modo Hexagonal" : "Modo Rectangular"; 
-        draw(); 
+        draw();
+        guardarDatos(); // <--- AGREGAR guardado de datos		
         if(editorZone === 'GRID') canvas.focus();
     }
     
@@ -611,6 +660,7 @@
         editorZone = 'GRID';
         updateButtonVisuals();
         draw();
+		guardarDatos(); // <--- AGREGAR guardado de datos
     }
 
     function calcularGMR() {
@@ -990,6 +1040,10 @@ function renderDMGTable() {
         document.getElementById('res_equiv').innerText = DMG_eq.toFixed(3);
 
         drawDMGGraph();
+		drawDMGGraph();
+        
+        // AGREGAR ESTA LÍNEA AQUÍ: guardado de datos
+        guardarDatos();
     }
 
     function drawDMGGraph() {
@@ -1090,6 +1144,56 @@ function renderDMGTable() {
             ctx.fillText("Superposicion!", 5, h - 5);
         }
     }
+	// ==========================================================
+    // PERSISTENCIA DE DATOS (LOCALSTORAGE)
+    // ==========================================================
+    
+    function guardarDatos() {
+        // 1. Guardar estado de DMG
+        localStorage.setItem('cmag_dmg_data', JSON.stringify(dmgData));
+        
+        // 2. Guardar estado de RMG
+        localStorage.setItem('cmag_rmg_matrix', JSON.stringify(matrix));
+        localStorage.setItem('cmag_rmg_mode', isHexMode);
+    }
+
+    function cargarDatos() {
+        try {
+            // 1. Cargar DMG
+            const savedDmg = localStorage.getItem('cmag_dmg_data');
+            if (savedDmg) {
+                dmgData = JSON.parse(savedDmg);
+                // Restaurar interfaz visual DMG
+                updateHeaderDisplays();
+                renderDMGTable();
+                calculateDMG(); // Esto redibuja el gráfico también
+                
+                // Restaurar botón de etiquetas (ABC/RST)
+                const textForButton = (dmgData.labelMode === 'ABC') ? 'RST' : 'ABC';
+                document.querySelector('.dmg-footer-btns .retro-btn').innerText = textForButton;
+            }
+
+            // 2. Cargar RMG
+            const savedMatrix = localStorage.getItem('cmag_rmg_matrix');
+            const savedMode = localStorage.getItem('cmag_rmg_mode');
+            
+            if (savedMatrix) {
+                matrix = JSON.parse(savedMatrix);
+            }
+            if (savedMode !== null) {
+                isHexMode = (savedMode === 'true'); // Convertir string a boolean
+                document.getElementById('headerTitle').innerText = isHexMode ? "Modo Hexagonal" : "Modo Rectangular";
+            }
+            draw(); // Redibujar RMG
+
+        } catch (e) {
+            console.error("Error cargando datos guardados:", e);
+            // Si hay error, no hacemos nada y dejamos los valores por defecto
+        }
+    }
+
+    // CARGAR AL INICIO: Ejecutamos la carga inmediatamente
+    cargarDatos();
 </script>
 
 </body>
