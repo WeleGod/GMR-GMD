@@ -874,7 +874,7 @@ function renderDMGTable() {
                     value="${p.x}"
                     data-row="${index}" data-col="0"
                     onfocus="this.select();"
-                    oninput="this.value = this.value.replace(/[^0-9.,+*\/() -]/g, ''); updatePoint(${index}, 'x', this.value)"
+                    oninput="this.value = this.value.replace(/[^0-9.,+*\/() ^-]/g, ''); updatePoint(${index}, 'x', this.value)"
                     onchange="smartCalculate(this, ${index}, 'x')">
             </td>
             
@@ -884,7 +884,7 @@ function renderDMGTable() {
                     value="${p.y}" 
                     data-row="${index}" data-col="1"
                     onfocus="this.select();"
-                    oninput="this.value = this.value.replace(/[^0-9.,+*\/() -]/g, ''); updatePoint(${index}, 'y', this.value)"
+                    oninput="this.value = this.value.replace(/[^0-9.,+*\/() ^-]/g, ''); updatePoint(${index}, 'y', this.value)"
                     onchange="smartCalculate(this, ${index}, 'y')">
             </td>
         `;
@@ -907,43 +907,58 @@ function renderDMGTable() {
             calculateDMG();
         }
     }
-	//Entrada Smart o matematica
-    function smartCalculate(inputElement, index, field) {
-        let rawVal = inputElement.value;
-        
-        // 1. Si está vacío, no hacemos nada
-        if(rawVal.trim() === '') return;
+	function smartCalculate(inputElement, index, field) {
+    let rawVal = inputElement.value.trim();
+    
+    // 1. LIMPIEZA VISUAL
+    inputElement.style.border = "1px solid transparent";
+    inputElement.style.backgroundColor = "transparent";
 
-        // 2. Reemplazamos comas por puntos para que JS entienda los decimales
-        //    Y reemplazamos 'x' por '*' por si el usuario usa la x minúscula como "por"
-        let formula = rawVal.replace(/,/g, '.').replace(/x/g, '*');
-
-        try {
-            // 3. Evaluamos la fórmula matemática de forma segura
-            // Solo ejecutamos si contiene caracteres seguros (números y operadores)
-            if (/^[\d.\-\+\*\/\(\) ]+$/.test(formula)) {
-                // El constructor Function es una forma más segura de evaluar matemáticas que eval()
-                let result = new Function('return ' + formula)();
-                
-                // Si el resultado es un número válido (y finito)
-                if (isFinite(result)) {
-                    // Redondeamos a 4 decimales para evitar cosas como 2.000000001
-                    // pero usamos parseFloat para quitar ceros innecesarios (ej: "4.0000" -> 4)
-                    let finalVal = parseFloat(result.toFixed(4));
-                    
-                    // Actualizamos el Input visualmente con el resultado
-                    inputElement.value = finalVal;
-                    
-                    // Guardamos en la data y recalculamos el gráfico
-                    dmgData.points[index][field] = finalVal;
-                    calculateDMG();
-                }
-            }
-        } catch (e) {
-            // Si la fórmula está mal (ej: "2++2"), no hacemos nada y dejamos el texto rojo o igual
-            console.log("Error en fórmula");
-        }
+    // 2. MANEJO DE VACÍO
+    if(rawVal === '') {
+        dmgData.points[index][field] = 0;
+        calculateDMG(); 
+        return;
     }
+
+    // 3. PREPARAR FÓRMULA (Aquí está la magia del exponente)
+    // - Comas a puntos
+    // - 'x' a '*'
+    // - '^' a '**' (Javascript usa ** para potencia)
+    let formula = rawVal
+        .replace(/,/g, '.')
+        .replace(/x/g, '*')
+        .replace(/\^/g, '**'); 
+
+    try {
+        // 4. VALIDACIÓN DE SEGURIDAD
+        // Agregamos ^ al regex de validación para que pase el filtro
+        if (/^[\d.\-\+\*\/\(\) \^]+$/.test(rawVal.replace(/x/g, '*'))) {
+            
+            // 5. EVALUACIÓN
+            let result = new Function('return ' + formula)();
+            
+            // 6. VERIFICACIÓN
+            if (isFinite(result) && !isNaN(result)) {
+                let finalVal = parseFloat(result.toFixed(4));
+                
+                inputElement.value = finalVal;
+                dmgData.points[index][field] = finalVal;
+                calculateDMG();
+                
+            } else {
+                throw new Error("Resultado inválido");
+            }
+        } else {
+            throw new Error("Caracteres inválidos");
+        }
+    } catch (e) {
+        // 7. FEEDBACK ERROR
+        console.warn("Error cálculo:", e);
+        inputElement.style.border = "1px solid #ff4444";
+        inputElement.style.backgroundColor = "rgba(255, 0, 0, 0.1)";
+    }
+}
     // --- NAVEGACION POR TECLADO EXCEL STYLE ---
     function handleDMGKeydown(e) {
         if (!e.target.classList.contains('dmg-input')) return;
